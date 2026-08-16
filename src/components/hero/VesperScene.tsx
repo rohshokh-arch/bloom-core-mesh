@@ -83,6 +83,7 @@ export default function VesperScene() {
       basePos[i * 3 + 1] = pPos[i * 3 + 1] = y;
       basePos[i * 3 + 2] = pPos[i * 3 + 2] = z;
       gradientColor(x, y, 2.2, tmp);
+      tmp.multiplyScalar(0.55);
       pCol[i * 3] = tmp.r;
       pCol[i * 3 + 1] = tmp.g;
       pCol[i * 3 + 2] = tmp.b;
@@ -94,10 +95,10 @@ export default function VesperScene() {
     const points = new THREE.Points(
       pGeo,
       new THREE.PointsMaterial({
-        size: 0.018,
+        size: 0.026,
         vertexColors: true,
         transparent: true,
-        opacity: 0.9,
+        opacity: 1,
         depthWrite: false,
         blending: THREE.NormalBlending,
         sizeAttenuation: true,
@@ -165,7 +166,7 @@ export default function VesperScene() {
       const burst = THREE.MathUtils.clamp((t - 1.1) / 2.0, 0, 1);
       const e = easeOut(burst);
       wire.scale.setScalar(0.15 + e * 0.85);
-      wMat.opacity = e * 0.55;
+      wMat.opacity = e * 0.5;
 
       // majestic rotation
       group.rotation.y = t * 0.13;
@@ -204,7 +205,8 @@ export default function VesperScene() {
         const n =
           noise3(x * 0.55 + t * 0.25, y * 0.55 - t * 0.18, z * 0.55) - 0.5;
         const n2 = noise3(x * 1.5, y * 1.5 + t * 0.4, z * 1.5) - 0.5;
-        let sc = 1 + n * 0.55 + n2 * 0.18;
+        const spike = Math.pow(Math.abs(n) * 2, 2.2) * 0.9;
+        const sc = 1 + n * 0.75 + n2 * 0.3 + spike;
         let px = x * sc,
           py = y * sc,
           pz = z * sc;
