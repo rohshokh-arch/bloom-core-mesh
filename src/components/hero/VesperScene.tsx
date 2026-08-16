@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-// Cheap value-noise (simplex-like feel) used for breathing + undulation
+// Cheap value-noise used for surface irregularities + undulation
 function hash(x: number, y: number, z: number) {
   const s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453;
   return s - Math.floor(s);
@@ -29,7 +29,6 @@ const CYAN = new THREE.Color("#00ffff");
 const PURPLE = new THREE.Color("#8800ff");
 
 function gradientColor(x: number, y: number, extent: number, out: THREE.Color) {
-  // diagonal mapping: top/left -> cyan, bottom/right -> purple
   const t = THREE.MathUtils.clamp((x - y) / (2 * extent) + 0.5, 0, 1);
   return out.copy(CYAN).lerp(PURPLE, t);
 }
@@ -59,59 +58,14 @@ export default function VesperScene() {
     const group = new THREE.Group();
     scene.add(group);
 
-    /* ---------- Phase 1: dense particle core (distorted torus) ---------- */
-    const COUNT = 14000;
-    const basePos = new Float32Array(COUNT * 3);
-    const pPos = new Float32Array(COUNT * 3);
-    const pCol = new Float32Array(COUNT * 3);
-    const tmp = new THREE.Color();
-
-    for (let i = 0; i < COUNT; i++) {
-      const u = Math.random() * Math.PI * 2;
-      const v = Math.random() * Math.PI * 2;
-      const R = 1.15 + noise3(Math.cos(u) * 2, Math.sin(u) * 2, v) * 0.5;
-      const r = 0.45 * Math.pow(Math.random(), 0.6);
-      let x = (R + r * Math.cos(v)) * Math.cos(u);
-      let y = (R + r * Math.cos(v)) * Math.sin(u) * 0.75;
-      let z = r * Math.sin(v) + Math.sin(u * 3) * 0.35;
-      // turbulence
-      const n = noise3(x * 1.6, y * 1.6, z * 1.6);
-      x += (n - 0.5) * 0.9;
-      y += (noise3(y * 1.9, z * 1.9, x * 1.9) - 0.5) * 0.9;
-      z += (noise3(z * 2.2, x * 2.2, y * 2.2) - 0.5) * 0.9;
-      basePos[i * 3] = pPos[i * 3] = x;
-      basePos[i * 3 + 1] = pPos[i * 3 + 1] = y;
-      basePos[i * 3 + 2] = pPos[i * 3 + 2] = z;
-      gradientColor(x, y, 2.2, tmp);
-      tmp.multiplyScalar(0.32);
-      pCol[i * 3] = tmp.r;
-      pCol[i * 3 + 1] = tmp.g;
-      pCol[i * 3 + 2] = tmp.b;
-    }
-
-    const pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
-    pGeo.setAttribute("color", new THREE.BufferAttribute(pCol, 3));
-    const points = new THREE.Points(
-      pGeo,
-      new THREE.PointsMaterial({
-        size: 0.032,
-        vertexColors: true,
-        transparent: true,
-        opacity: 1,
-        depthWrite: false,
-        blending: THREE.NormalBlending,
-        sizeAttenuation: true,
-      }),
-    );
-    group.add(points);
-
-    /* ---------- Phase 2/3: exploded procedural wireframe surface ---------- */
-    const wGeo = new THREE.IcosahedronGeometry(3.4, 12);
+    /* ---------- Phase 2 target: procedural wireframe surface ---------- */
+    const wGeo = new THREE.IcosahedronGeometry(3.0, 10);
     const wPosAttr = wGeo.getAttribute("position") as THREE.BufferAttribute;
     const wCount = wPosAttr.count;
     const wBase = new Float32Array(wPosAttr.array);
+    const wPos = wPosAttr.array as Float32Array;
     const wCol = new Float32Array(wCount * 3);
+    const tmp = new THREE.Color();
     for (let i = 0; i < wCount; i++) {
       gradientColor(wBase[i * 3]!, wBase[i * 3 + 1]!, 3.6, tmp);
       wCol[i * 3] = tmp.r;
@@ -127,8 +81,71 @@ export default function VesperScene() {
       depthWrite: false,
     });
     const wire = new THREE.Mesh(wGeo, wMat);
-    wire.scale.setScalar(0.15);
     group.add(wire);
+
+    /* ---------- Phase 1: dense particle shell ---------- */
+    const COUNT = 40000;
+    const orbPos = new Float32Array(COUNT * 3); // undisplaced shell point
+    const orbNrm = new Float32Array(COUNT * 3); // outward normal
+    const pPos = new Float32Array(COUNT * 3);
+    const pCol = new Float32Array(COUNT * 3);
+    const stagger = new Float32Array(COUNT);
+    const jitter = new Float32Array(COUNT);
+    const targetIdx = new Uint32Array(COUNT);
+
+    for (let i = 0; i < COUNT; i++) {
+      // uniform point on sphere -> hollow shell, denser silhouette by projection
+      const z = Math.random() * 2 - 1;
+      const a = Math.random() * Math.PI * 2;
+      const s = Math.sqrt(1 - z * z);
+      const nx = s * Math.cos(a),
+        ny = s * Math.sin(a),
+        nz = z;
+
+      // layered noise: big lobes + fine ripple
+      const lobes = noise3(nx * 1.35 + 8, ny * 1.35 + 3, nz * 1.35 + 5) - 0.5;
+      const ripple = noise3(nx * 4.2, ny * 4.2, nz * 4.2) - 0.5;
+      const R = 1.85 + lobes * 1.15 + ripple * 0.22;
+
+      const x = nx * R,
+        y = ny * R * 0.94,
+        zz = nz * R;
+      orbPos[i * 3] = x;
+      orbPos[i * 3 + 1] = y;
+      orbPos[i * 3 + 2] = zz;
+      orbNrm[i * 3] = nx;
+      orbNrm[i * 3 + 1] = ny;
+      orbNrm[i * 3 + 2] = nz;
+      pPos[i * 3] = x;
+      pPos[i * 3 + 1] = y;
+      pPos[i * 3 + 2] = zz;
+
+      stagger[i] = Math.random() * 0.35;
+      jitter[i] = Math.random();
+      targetIdx[i] = (Math.random() * wCount) | 0;
+
+      gradientColor(x, y, 2.6, tmp);
+      tmp.multiplyScalar(0.42);
+      pCol[i * 3] = tmp.r;
+      pCol[i * 3 + 1] = tmp.g;
+      pCol[i * 3 + 2] = tmp.b;
+    }
+
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+    pGeo.setAttribute("color", new THREE.BufferAttribute(pCol, 3));
+    const points = new THREE.Points(
+      pGeo,
+      new THREE.PointsMaterial({
+        size: 0.026,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1,
+        depthWrite: false,
+        sizeAttenuation: true,
+      }),
+    );
+    group.add(points);
 
     /* ---------- interaction ---------- */
     const pointer = new THREE.Vector2(999, 999);
@@ -142,6 +159,15 @@ export default function VesperScene() {
     window.addEventListener("pointermove", onMove);
     mount.addEventListener("pointerleave", onLeave);
 
+    // re-triggerable explosion
+    const HOLD = 4.2; // seconds of unstable orb
+    const BURST = 2.6; // seconds of flight
+    let startedAt = 0;
+    const onClick = () => {
+      startedAt = clock.getElapsedTime();
+    };
+    window.addEventListener("click", onClick);
+
     const onResize = () => {
       if (!mount.clientWidth) return;
       camera.aspect = mount.clientWidth / mount.clientHeight;
@@ -152,58 +178,39 @@ export default function VesperScene() {
 
     /* ---------- loop ---------- */
     const clock = new THREE.Clock();
-    const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
-    const wPos = wPosAttr.array as Float32Array;
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
     const local = new THREE.Vector3();
-    let raf = 0;
     const inv = new THREE.Matrix4();
+    let raf = 0;
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
       const t = clock.getElapsedTime();
 
-      // Phase 2 explosion timing
-      const burst = THREE.MathUtils.clamp((t - 1.1) / 2.0, 0, 1);
-      const e = easeOut(burst);
-      wire.scale.setScalar(0.15 + e * 0.85);
-      wMat.opacity = e * 0.5;
+      // global phase: 0 = orb, 1 = wireframe
+      const elapsed = t - startedAt;
+      const phase = THREE.MathUtils.clamp((elapsed - HOLD) / BURST, 0, 1);
 
-      // majestic rotation
       group.rotation.y = t * 0.13;
       group.rotation.x = Math.sin(t * 0.11) * 0.16;
 
       // pointer in object space
       pointer3.set(pointer.x, pointer.y, 0.5).unproject(camera);
       const dir = pointer3.sub(camera.position).normalize();
-      const hit = camera.position.clone().add(dir.multiplyScalar(camera.position.z / -dir.z));
+      const hit = camera.position
+        .clone()
+        .add(dir.multiplyScalar(camera.position.z / -dir.z));
       inv.copy(group.matrixWorld).invert();
       hit.applyMatrix4(inv);
-
-      // breathing core
-      const bp = pPos;
-      const shimmer = 0.06 + Math.sin(t * 0.8) * 0.02;
-      for (let i = 0; i < COUNT; i++) {
-        const i3 = i * 3;
-        const x = basePos[i3]!,
-          y = basePos[i3 + 1]!,
-          z = basePos[i3 + 2]!;
-        const n = noise3(x * 1.4 + t * 0.35, y * 1.4, z * 1.4 - t * 0.25) - 0.5;
-        const sc = 1 + n * shimmer + e * 0.55;
-        bp[i3] = x * sc;
-        bp[i3 + 1] = y * sc;
-        bp[i3 + 2] = z * sc;
-      }
-      pGeo.getAttribute("position").needsUpdate = true;
-
-      // undulating wireframe + elastic pointer repulsion
       const near = hit.length() < 30;
+
+      /* wireframe surface (targets live here even while invisible) */
       for (let i = 0; i < wCount; i++) {
         const i3 = i * 3;
         const x = wBase[i3]!,
           y = wBase[i3 + 1]!,
           z = wBase[i3 + 2]!;
-        const n =
-          noise3(x * 0.55 + t * 0.25, y * 0.55 - t * 0.18, z * 0.55) - 0.5;
+        const n = noise3(x * 0.55 + t * 0.25, y * 0.55 - t * 0.18, z * 0.55) - 0.5;
         const n2 = noise3(x * 1.5, y * 1.5 + t * 0.4, z * 1.5) - 0.5;
         const spike = Math.pow(Math.abs(n) * 2, 2.2) * 0.9;
         const sc = 1 + n * 0.75 + n2 * 0.3 + spike;
@@ -211,7 +218,7 @@ export default function VesperScene() {
           py = y * sc,
           pz = z * sc;
 
-        if (near) {
+        if (near && phase > 0.5) {
           local.set(px, py, pz);
           const d = local.distanceTo(hit);
           const radius = 2.2;
@@ -222,12 +229,58 @@ export default function VesperScene() {
             pz += ((pz - hit.z) / (d + 0.001)) * push;
           }
         }
-        // elastic snap-back
         wPos[i3] = wPos[i3]! + (px - wPos[i3]!) * 0.12;
         wPos[i3 + 1] = wPos[i3 + 1]! + (py - wPos[i3 + 1]!) * 0.12;
         wPos[i3 + 2] = wPos[i3 + 2]! + (pz - wPos[i3 + 2]!) * 0.12;
       }
       wPosAttr.needsUpdate = true;
+      wMat.opacity = THREE.MathUtils.smoothstep(phase, 0.45, 1) * 0.5;
+
+      /* particles: unstable orb -> burst -> wireframe */
+      const tension = THREE.MathUtils.clamp(elapsed / HOLD, 0, 1);
+      const breathe = 1 + Math.sin(t * 1.15) * (0.012 + tension * 0.045);
+      const hotAmp = 0.12 + tension * tension * 0.75;
+
+      for (let i = 0; i < COUNT; i++) {
+        const i3 = i * 3;
+        const ox = orbPos[i3]!,
+          oy = orbPos[i3 + 1]!,
+          oz = orbPos[i3 + 2]!;
+        const nx = orbNrm[i3]!,
+          ny = orbNrm[i3 + 1]!,
+          nz = orbNrm[i3 + 2]!;
+
+        // pre-explosion hot spots: localized swelling that quickens
+        const hot =
+          noise3(nx * 1.9 + t * 0.5, ny * 1.9 - t * 0.32, nz * 1.9 + t * 0.22) - 0.5;
+        const swell = 1 + hot * hotAmp;
+        const jx = (jitter[i]! - 0.5) * tension * tension * 0.06;
+
+        let x = (ox * swell + nx * jx) * breathe;
+        let y = (oy * swell + ny * jx) * breathe;
+        let z = (oz * swell + nz * jx) * breathe;
+
+        if (phase > 0) {
+          // staggered per-particle progress
+          const st = stagger[i]!;
+          const q = THREE.MathUtils.clamp((phase - st) / (1 - st), 0, 1);
+          const k = easeOut(q);
+          const ti = targetIdx[i]! * 3;
+          const tx = wPos[ti]!,
+            ty = wPos[ti + 1]!,
+            tz = wPos[ti + 2]!;
+          // mid-flight outward bulge along the particle's own normal
+          const arc = Math.sin(Math.PI * q) * (1.6 + jitter[i]! * 1.4);
+          x = x + (tx - x) * k + nx * arc;
+          y = y + (ty - y) * k + ny * arc;
+          z = z + (tz - z) * k + nz * arc;
+        }
+
+        pPos[i3] = x;
+        pPos[i3 + 1] = y;
+        pPos[i3 + 2] = z;
+      }
+      pGeo.getAttribute("position").needsUpdate = true;
 
       renderer.render(scene, camera);
     };
@@ -237,12 +290,14 @@ export default function VesperScene() {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("click", onClick);
       mount.removeEventListener("pointerleave", onLeave);
       renderer.dispose();
       pGeo.dispose();
       wGeo.dispose();
       wMat.dispose();
-      if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
+      if (renderer.domElement.parentNode === mount)
+        mount.removeChild(renderer.domElement);
     };
   }, []);
 
