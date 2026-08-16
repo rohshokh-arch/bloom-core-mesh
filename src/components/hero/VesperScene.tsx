@@ -107,11 +107,12 @@ export default function VesperScene() {
 
     /* ---------- Phase 2/3: exploded procedural wireframe surface ---------- */
     const wGeo = new THREE.IcosahedronGeometry(3.4, 12);
-    const wCount = wGeo.attributes.position.count;
-    const wBase = new Float32Array(wGeo.attributes.position.array);
+    const wPosAttr = wGeo.getAttribute("position") as THREE.BufferAttribute;
+    const wCount = wPosAttr.count;
+    const wBase = new Float32Array(wPosAttr.array);
     const wCol = new Float32Array(wCount * 3);
     for (let i = 0; i < wCount; i++) {
-      gradientColor(wBase[i * 3], wBase[i * 3 + 1], 3.6, tmp);
+      gradientColor(wBase[i * 3]!, wBase[i * 3 + 1]!, 3.6, tmp);
       wCol[i * 3] = tmp.r;
       wCol[i * 3 + 1] = tmp.g;
       wCol[i * 3 + 2] = tmp.b;
@@ -151,7 +152,7 @@ export default function VesperScene() {
     /* ---------- loop ---------- */
     const clock = new THREE.Clock();
     const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
-    const wPos = wGeo.attributes.position.array as Float32Array;
+    const wPos = wPosAttr.array as Float32Array;
     const local = new THREE.Vector3();
     let raf = 0;
     const inv = new THREE.Matrix4();
@@ -178,28 +179,28 @@ export default function VesperScene() {
       hit.applyMatrix4(inv);
 
       // breathing core
-      const bp = pGeo.attributes.position.array as Float32Array;
+      const bp = pPos;
       const shimmer = 0.06 + Math.sin(t * 0.8) * 0.02;
       for (let i = 0; i < COUNT; i++) {
         const i3 = i * 3;
-        const x = basePos[i3],
-          y = basePos[i3 + 1],
-          z = basePos[i3 + 2];
+        const x = basePos[i3]!,
+          y = basePos[i3 + 1]!,
+          z = basePos[i3 + 2]!;
         const n = noise3(x * 1.4 + t * 0.35, y * 1.4, z * 1.4 - t * 0.25) - 0.5;
         const sc = 1 + n * shimmer + e * 0.15;
         bp[i3] = x * sc;
         bp[i3 + 1] = y * sc;
         bp[i3 + 2] = z * sc;
       }
-      pGeo.attributes.position.needsUpdate = true;
+      pGeo.getAttribute("position").needsUpdate = true;
 
       // undulating wireframe + elastic pointer repulsion
       const near = hit.length() < 30;
       for (let i = 0; i < wCount; i++) {
         const i3 = i * 3;
-        const x = wBase[i3],
-          y = wBase[i3 + 1],
-          z = wBase[i3 + 2];
+        const x = wBase[i3]!,
+          y = wBase[i3 + 1]!,
+          z = wBase[i3 + 2]!;
         const n =
           noise3(x * 0.55 + t * 0.25, y * 0.55 - t * 0.18, z * 0.55) - 0.5;
         const n2 = noise3(x * 1.5, y * 1.5 + t * 0.4, z * 1.5) - 0.5;
@@ -220,11 +221,11 @@ export default function VesperScene() {
           }
         }
         // elastic snap-back
-        wPos[i3] += (px - wPos[i3]) * 0.12;
-        wPos[i3 + 1] += (py - wPos[i3 + 1]) * 0.12;
-        wPos[i3 + 2] += (pz - wPos[i3 + 2]) * 0.12;
+        wPos[i3] = wPos[i3]! + (px - wPos[i3]!) * 0.12;
+        wPos[i3 + 1] = wPos[i3 + 1]! + (py - wPos[i3 + 1]!) * 0.12;
+        wPos[i3 + 2] = wPos[i3 + 2]! + (pz - wPos[i3 + 2]!) * 0.12;
       }
-      wGeo.attributes.position.needsUpdate = true;
+      wPosAttr.needsUpdate = true;
 
       renderer.render(scene, camera);
     };
