@@ -83,7 +83,7 @@ export default function VesperScene() {
       basePos[i * 3 + 1] = pPos[i * 3 + 1] = y;
       basePos[i * 3 + 2] = pPos[i * 3 + 2] = z;
       gradientColor(x, y, 2.2, tmp);
-      tmp.multiplyScalar(0.55);
+      tmp.multiplyScalar(0.32);
       pCol[i * 3] = tmp.r;
       pCol[i * 3 + 1] = tmp.g;
       pCol[i * 3 + 2] = tmp.b;
@@ -95,7 +95,7 @@ export default function VesperScene() {
     const points = new THREE.Points(
       pGeo,
       new THREE.PointsMaterial({
-        size: 0.026,
+        size: 0.032,
         vertexColors: true,
         transparent: true,
         opacity: 1,
@@ -188,7 +188,7 @@ export default function VesperScene() {
           y = basePos[i3 + 1]!,
           z = basePos[i3 + 2]!;
         const n = noise3(x * 1.4 + t * 0.35, y * 1.4, z * 1.4 - t * 0.25) - 0.5;
-        const sc = 1 + n * shimmer + e * 0.15;
+        const sc = 1 + n * shimmer + e * 0.55;
         bp[i3] = x * sc;
         bp[i3 + 1] = y * sc;
         bp[i3 + 2] = z * sc;
