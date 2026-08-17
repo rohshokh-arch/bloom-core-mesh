@@ -276,7 +276,7 @@ export default function VesperScene() {
       // lines swell in as debris travels, then fade back so the vertices read
       const fadeIn = THREE.MathUtils.smoothstep(phase, 0.3, 0.72);
       const fadeBack = THREE.MathUtils.smoothstep(phase, 0.8, 1);
-      wMat.opacity = fadeIn * 0.55 - fadeBack * 0.36;
+      wMat.opacity = Math.max(0, fadeIn * 0.55 - fadeBack * 0.36);
       pMat.size = baseSize * (1 - THREE.MathUtils.smoothstep(phase, 0.6, 1) * 0.3);
 
       /* particles: unstable orb -> burst -> wireframe */
