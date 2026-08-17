@@ -33,12 +33,23 @@ function gradientColor(x: number, y: number, extent: number, out: THREE.Color) {
   return out.copy(CYAN).lerp(PURPLE, t);
 }
 
+function resolveCount() {
+  if (typeof window === "undefined") return 20000;
+  const w = window.innerWidth;
+  const cores = navigator.hardwareConcurrency ?? 4;
+  const small = w < 1024 || cores <= 4;
+  return small ? 6000 : 20000;
+}
+
 export default function VesperScene() {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+
+    const isSmall = window.innerWidth < 1024;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -49,8 +60,8 @@ export default function VesperScene() {
     );
     camera.position.set(0, 0, 9);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: !isSmall, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.5 : 2));
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
@@ -59,7 +70,7 @@ export default function VesperScene() {
     scene.add(group);
 
     /* ---------- Phase 2 target: procedural wireframe surface ---------- */
-    const wGeo = new THREE.IcosahedronGeometry(3.0, 10);
+    const wGeo = new THREE.IcosahedronGeometry(3.0, isSmall ? 6 : 10);
     const wPosAttr = wGeo.getAttribute("position") as THREE.BufferAttribute;
     const wCount = wPosAttr.count;
     const wBase = new Float32Array(wPosAttr.array);
@@ -84,7 +95,7 @@ export default function VesperScene() {
     group.add(wire);
 
     /* ---------- Phase 1: dense particle shell ---------- */
-    const COUNT = 40000;
+    const COUNT = resolveCount();
     const orbPos = new Float32Array(COUNT * 3); // undisplaced shell point
     const orbNrm = new Float32Array(COUNT * 3); // outward normal
     const pPos = new Float32Array(COUNT * 3);
@@ -122,7 +133,7 @@ export default function VesperScene() {
 
       stagger[i] = Math.random() * 0.35;
       jitter[i] = Math.random();
-      targetIdx[i] = (Math.random() * wCount) | 0;
+      targetIdx[i] = i % wCount;
 
       gradientColor(x, y, 2.6, tmp);
       tmp.multiplyScalar(0.42);
@@ -134,29 +145,44 @@ export default function VesperScene() {
     const pGeo = new THREE.BufferGeometry();
     pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
     pGeo.setAttribute("color", new THREE.BufferAttribute(pCol, 3));
-    const points = new THREE.Points(
-      pGeo,
-      new THREE.PointsMaterial({
-        size: 0.026,
-        vertexColors: true,
-        transparent: true,
-        opacity: 1,
-        depthWrite: false,
-        sizeAttenuation: true,
-      }),
-    );
+    const pMat = new THREE.PointsMaterial({
+      size: isSmall ? 0.042 : 0.03,
+      vertexColors: true,
+      transparent: true,
+      opacity: 1,
+      depthWrite: false,
+      sizeAttenuation: true,
+    });
+    const baseSize = pMat.size;
+    const points = new THREE.Points(pGeo, pMat);
     group.add(points);
 
     /* ---------- interaction ---------- */
     const pointer = new THREE.Vector2(999, 999);
     const pointer3 = new THREE.Vector3(999, 999, 0);
+    let dragging = false;
+    let lastPx = 0;
+    let spin = 0;
+    let parX = 0,
+      parY = 0;
     const onMove = (e: PointerEvent) => {
       const rect = mount.getBoundingClientRect();
       pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      if (dragging) {
+        spin += (e.clientX - lastPx) * 0.0009;
+        lastPx = e.clientX;
+      }
     };
     const onLeave = () => pointer.set(999, 999);
+    const onDown = (e: PointerEvent) => {
+      dragging = true;
+      lastPx = e.clientX;
+    };
+    const onUp = () => (dragging = false);
     window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
     mount.addEventListener("pointerleave", onLeave);
 
     // re-triggerable explosion
@@ -182,6 +208,7 @@ export default function VesperScene() {
     const local = new THREE.Vector3();
     const inv = new THREE.Matrix4();
     let raf = 0;
+    let rot = 0;
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
@@ -189,10 +216,22 @@ export default function VesperScene() {
 
       // global phase: 0 = orb, 1 = wireframe
       const elapsed = t - startedAt;
-      const phase = THREE.MathUtils.clamp((elapsed - HOLD) / BURST, 0, 1);
+      const phase = reduced
+        ? 1
+        : THREE.MathUtils.clamp((elapsed - HOLD) / BURST, 0, 1);
 
-      group.rotation.y = t * 0.13;
+      spin *= 0.94;
+      rot += 0.13 / 60 + spin;
+      group.rotation.y = rot;
       group.rotation.x = Math.sin(t * 0.11) * 0.16;
+
+      // pointer parallax
+      const tpx = pointer.x > 900 ? 0 : pointer.x * 0.12;
+      const tpy = pointer.y > 900 ? 0 : pointer.y * 0.1;
+      parX += (tpy - parX) * 0.05;
+      parY += (tpx - parY) * 0.05;
+      group.rotation.x += parX;
+      group.rotation.y += parY;
 
       // pointer in object space
       pointer3.set(pointer.x, pointer.y, 0.5).unproject(camera);
@@ -234,7 +273,11 @@ export default function VesperScene() {
         wPos[i3 + 2] = wPos[i3 + 2]! + (pz - wPos[i3 + 2]!) * 0.12;
       }
       wPosAttr.needsUpdate = true;
-      wMat.opacity = THREE.MathUtils.smoothstep(phase, 0.45, 1) * 0.5;
+      // lines swell in as debris travels, then fade back so the vertices read
+      const fadeIn = THREE.MathUtils.smoothstep(phase, 0.3, 0.72);
+      const fadeBack = THREE.MathUtils.smoothstep(phase, 0.8, 1);
+      wMat.opacity = fadeIn * 0.55 - fadeBack * 0.36;
+      pMat.size = baseSize * (1 - THREE.MathUtils.smoothstep(phase, 0.6, 1) * 0.3);
 
       /* particles: unstable orb -> burst -> wireframe */
       const tension = THREE.MathUtils.clamp(elapsed / HOLD, 0, 1);
@@ -259,6 +302,22 @@ export default function VesperScene() {
         let x = (ox * swell + nx * jx) * breathe;
         let y = (oy * swell + ny * jx) * breathe;
         let z = (oz * swell + nz * jx) * breathe;
+
+        // phase 1: pointer dents / repels the shell
+        if (near && phase < 0.6) {
+          const dx = x - hit.x,
+            dy = y - hit.y,
+            dz = z - hit.z;
+          const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          const radius = 1.6;
+          if (d < radius) {
+            const push = (1 - d / radius) ** 2 * 0.85 * (1 - phase);
+            const shimmer = Math.sin(t * 9 + jitter[i]! * 20) * 0.05 * push;
+            x += (dx / (d + 0.001)) * push + shimmer;
+            y += (dy / (d + 0.001)) * push + shimmer;
+            z += (dz / (d + 0.001)) * push;
+          }
+        }
 
         if (phase > 0) {
           // staggered per-particle progress
@@ -289,6 +348,8 @@ export default function VesperScene() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("click", onClick);
       mount.removeEventListener("pointerleave", onLeave);
