@@ -61,7 +61,8 @@ export default function VesperScene() {
     const fitZ = () => {
       const w = Math.max(mount.clientWidth, 1);
       const h = Math.max(mount.clientHeight, 1);
-      return 9 * Math.max(1, h / w) * 1.2;
+      // portrait screens are width-limited: pull back by the inverse aspect
+      return 9 * Math.max(1, (h / w) * 0.62) * 1.35;
     };
     camera.position.set(0, 0, fitZ());
 
