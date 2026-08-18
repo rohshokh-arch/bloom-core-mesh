@@ -58,10 +58,11 @@ export default function VesperScene() {
       0.1,
       200,
     );
-    const fitZ = () =>
-      mount.clientWidth < mount.clientHeight
-        ? 9 * (mount.clientHeight / Math.max(mount.clientWidth, 1)) * 0.85
-        : 9;
+    const fitZ = () => {
+      const w = Math.max(mount.clientWidth, 1);
+      const h = Math.max(mount.clientHeight, 1);
+      return 9 * Math.max(1, h / w) * 1.2;
+    };
     camera.position.set(0, 0, fitZ());
 
     const renderer = new THREE.WebGLRenderer({ antialias: !isSmall, alpha: true });
