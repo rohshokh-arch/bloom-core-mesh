@@ -1,5 +1,7 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import { Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const VesperScene = lazy(() => import("@/components/hero/VesperScene"));
 
@@ -61,12 +63,31 @@ function Index() {
               </li>
             ))}
           </ul>
-          <a
-            href="#"
-            className="shrink-0 whitespace-nowrap rounded-full border border-ink-muted/40 px-3.5 py-1.5 text-ink-foreground transition-colors hover:border-ink-foreground/60"
-          >
-            Contact <span className="ml-1 text-ink-muted">⌄</span>
-          </a>
+          <div className="flex shrink-0 items-center gap-2">
+            <a
+              href="#"
+              className="hidden shrink-0 whitespace-nowrap rounded-full border border-ink-muted/40 px-3.5 py-1.5 text-ink-foreground transition-colors hover:border-ink-foreground/60 md:inline-block"
+            >
+              Contact <span className="ml-1 text-ink-muted">⌄</span>
+            </a>
+            <Sheet>
+              <SheetTrigger
+                aria-label="Open menu"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-ink-muted/40 text-ink-foreground transition-colors hover:border-ink-foreground/60 md:hidden"
+              >
+                <Menu className="h-4 w-4" />
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64 bg-ink text-ink-foreground">
+                <nav className="mt-10 flex flex-col gap-5 px-5 text-lg font-light">
+                  {["Home", "Tools", "Works", "About", "Contact"].map((l) => (
+                    <a key={l} href="#" className="text-ink-foreground/85 hover:text-ink-foreground">
+                      {l}
+                    </a>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </nav>
       </header>
 
@@ -74,8 +95,10 @@ function Index() {
       <div className="relative z-10 px-4 pt-6 sm:px-10 sm:pt-8">
         <h1 className="pointer-events-none max-w-[16ch] text-[clamp(1.9rem,5.2vw,4.2rem)] font-extralight leading-[1.05] tracking-[-0.03em] text-foreground">
           Computational automation
-          <br className="hidden sm:block" /> from Design
-          <br className="hidden sm:block" /> to Fabrication
+          <br className="hidden sm:block" />{" "}
+          <span className="text-gradient-flow">from Design</span>
+          <br className="hidden sm:block" />{" "}
+          <span className="text-gradient-flow">to Fabrication</span>
         </h1>
       </div>
 
@@ -88,8 +111,8 @@ function Index() {
           fabrication-ready output.
         </p>
 
-        <div className="flex w-full flex-col gap-4 lg:w-[21rem] lg:items-end">
-          <p className="text-[13px] leading-snug text-foreground/85 lg:text-right">
+        <div className="flex w-full flex-col gap-4 lg:w-[23rem]">
+          <p className="text-[15px] font-medium leading-snug text-foreground lg:text-right">
             We turn design intent into computation: solvers, optimisation and CNC-ready geometry,
             with our Grasshopper tools running live in your browser.
           </p>
