@@ -25,8 +25,8 @@ function noise3(x: number, y: number, z: number) {
   );
 }
 
-const CYAN = new THREE.Color("#00ffff");
-const PURPLE = new THREE.Color("#8800ff");
+const CYAN = new THREE.Color("#00d5e6");
+const PURPLE = new THREE.Color("#6a00e0");
 
 function gradientColor(x: number, y: number, extent: number, out: THREE.Color) {
   const t = THREE.MathUtils.clamp((x - y) / (2 * extent) + 0.5, 0, 1);
@@ -71,7 +71,7 @@ export default function VesperScene() {
       const w = Math.max(mount.clientWidth, 1);
       const h = Math.max(mount.clientHeight, 1);
       // portrait / narrow screens are width-limited
-      return THREE.MathUtils.clamp(w / 1100, 0.4, 1) * (w < h ? 0.8 : 1);
+      return THREE.MathUtils.clamp(w / 900, 0.62, 1) * (w < h ? 0.92 : 1);
     };
     group.scale.setScalar(fitScale());
     scene.add(group);
@@ -143,7 +143,7 @@ export default function VesperScene() {
       targetIdx[i] = i % wCount;
 
       gradientColor(x, y, 2.6, tmp);
-      tmp.multiplyScalar(0.42);
+      tmp.multiplyScalar(0.78);
       pCol[i * 3] = tmp.r;
       pCol[i * 3 + 1] = tmp.g;
       pCol[i * 3 + 2] = tmp.b;
@@ -153,7 +153,7 @@ export default function VesperScene() {
     pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
     pGeo.setAttribute("color", new THREE.BufferAttribute(pCol, 3));
     const pMat = new THREE.PointsMaterial({
-      size: isSmall ? 0.042 : 0.03,
+      size: isSmall ? 0.05 : 0.038,
       vertexColors: true,
       transparent: true,
       opacity: 1,
@@ -259,8 +259,8 @@ export default function VesperScene() {
           z = wBase[i3 + 2]!;
         const n = noise3(x * 0.55 + t * 0.25, y * 0.55 - t * 0.18, z * 0.55) - 0.5;
         const n2 = noise3(x * 1.5, y * 1.5 + t * 0.4, z * 1.5) - 0.5;
-        const spike = Math.pow(Math.abs(n) * 2, 2.2) * 0.9;
-        const sc = 1 + n * 0.75 + n2 * 0.3 + spike;
+        const spike = Math.pow(Math.abs(n) * 2, 2.6) * 1.25;
+        const sc = 1 + n * 0.95 + n2 * 0.38 + spike;
         let px = x * sc,
           py = y * sc,
           pz = z * sc;
@@ -284,8 +284,8 @@ export default function VesperScene() {
       // lines swell in as debris travels, then fade back so the vertices read
       const fadeIn = THREE.MathUtils.smoothstep(phase, 0.3, 0.72);
       const fadeBack = THREE.MathUtils.smoothstep(phase, 0.8, 1);
-      wMat.opacity = Math.max(0, fadeIn * 0.55 - fadeBack * 0.36);
-      pMat.size = baseSize * (1 - THREE.MathUtils.smoothstep(phase, 0.6, 1) * 0.3);
+      wMat.opacity = Math.max(0, fadeIn * 0.9 - fadeBack * 0.24);
+      pMat.size = baseSize * (1 - THREE.MathUtils.smoothstep(phase, 0.6, 1) * 0.08);
 
       /* particles: unstable orb -> burst -> wireframe */
       const tension = THREE.MathUtils.clamp(elapsed / HOLD, 0, 1);
