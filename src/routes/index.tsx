@@ -83,7 +83,7 @@ function Index() {
 
       {/* BOTTOM CONTENT */}
       <div className="relative z-10 grid gap-6 px-4 pb-6 sm:px-10 sm:pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-        <p className="pointer-events-none max-w-xs text-[11px] uppercase leading-relaxed tracking-[0.02em] text-foreground">
+        <p className="pointer-events-none hidden max-w-xs text-[11px] uppercase leading-relaxed tracking-[0.02em] text-foreground lg:block">
           Parametric geometry, Grasshopper-driven logic and generative workflows — resolved into
           fabrication-ready output.
         </p>
