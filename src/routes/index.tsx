@@ -96,9 +96,9 @@ function Index() {
         <h1 className="pointer-events-none max-w-[16ch] text-[clamp(1.9rem,5.2vw,4.2rem)] font-extralight leading-[1.05] tracking-[-0.03em] text-foreground">
           Computational automation
           <br className="hidden sm:block" />{" "}
-          <span className="text-gradient-flow">from Design</span>
+          <span className="text-gradient-flow font-semibold">from Design</span>
           <br className="hidden sm:block" />{" "}
-          <span className="text-gradient-flow">to Fabrication</span>
+          <span className="text-gradient-flow font-semibold">to Fabrication</span>
         </h1>
       </div>
 
