@@ -58,7 +58,11 @@ export default function VesperScene() {
       0.1,
       200,
     );
-    camera.position.set(0, 0, 9);
+    const fitZ = () =>
+      mount.clientWidth < mount.clientHeight
+        ? 9 * (mount.clientHeight / Math.max(mount.clientWidth, 1)) * 0.85
+        : 9;
+    camera.position.set(0, 0, fitZ());
 
     const renderer = new THREE.WebGLRenderer({ antialias: !isSmall, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.5 : 2));
@@ -197,6 +201,7 @@ export default function VesperScene() {
     const onResize = () => {
       if (!mount.clientWidth) return;
       camera.aspect = mount.clientWidth / mount.clientHeight;
+      camera.position.z = fitZ();
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
     };
