@@ -67,6 +67,13 @@ export default function VesperScene() {
     mount.appendChild(renderer.domElement);
 
     const group = new THREE.Group();
+    const fitScale = () => {
+      const w = Math.max(mount.clientWidth, 1);
+      const h = Math.max(mount.clientHeight, 1);
+      // portrait / narrow screens are width-limited
+      return THREE.MathUtils.clamp(w / 1100, 0.4, 1) * (w < h ? 0.8 : 1);
+    };
+    group.scale.setScalar(fitScale());
     scene.add(group);
 
     /* ---------- Phase 2 target: procedural wireframe surface ---------- */
@@ -197,6 +204,7 @@ export default function VesperScene() {
     const onResize = () => {
       if (!mount.clientWidth) return;
       camera.aspect = mount.clientWidth / mount.clientHeight;
+      group.scale.setScalar(fitScale());
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
     };
