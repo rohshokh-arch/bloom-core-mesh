@@ -9,6 +9,13 @@ Bring the Works, Tools and Process content from your other app into this project
 - Nothing is carried over from the other app's styling — no uppercase-bold headings, no Space Mono, no dark cards, no framer-motion entrance choreography (light CSS/IntersectionObserver reveals instead).
 - Only the content, data and interaction logic are ported.
 
+## Hero fixes (done first)
+
+- **Headline back to its original style**: drop the gradient and the semibold weight — the whole line "Computational automation from Design to Fabrication" returns to one ultralight, single-colour ink treatment, keeping the current clamp sizing and line stack.
+- **Mobile nav**: the nav links currently disappear on small screens. The menu button opens a full-height panel listing Home, Works, Tools, About and Contact, with the logo at the top, generous tap targets and a visible close control, so every section is reachable on mobile.
+- **CadF branding**: the asterisk mark and "Vesper" wordmark are replaced by the CadF logo image plus the CadF wordmark in the hero nav, the mobile menu and the footer; page title, meta text and favicon follow.
+- `VesperScene.tsx` is left as it is.
+
 ## Routes
 
 ```text
