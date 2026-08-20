@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsIdRouteImport } from './routes/tools.$id'
 import { Route as WorksIndexRouteImport } from './routes/works.index'
 import { Route as WorksIdRouteImport } from './routes/works.$id'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
   id: '/tools/',
   path: '/tools/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIdRoute = ToolsIdRouteImport.update({
+  id: '/tools/$id',
+  path: '/tools/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorksIndexRoute = WorksIndexRouteImport.update({
@@ -37,12 +43,14 @@ const WorksIdRoute = WorksIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/tools/$id': typeof ToolsIdRoute
   '/works/$id': typeof WorksIdRoute
   '/tools/': typeof ToolsIndexRoute
   '/works/': typeof WorksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/tools/$id': typeof ToolsIdRoute
   '/works/$id': typeof WorksIdRoute
   '/tools': typeof ToolsIndexRoute
   '/works': typeof WorksIndexRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/tools/$id': typeof ToolsIdRoute
   '/works/$id': typeof WorksIdRoute
   '/tools/': typeof ToolsIndexRoute
   '/works/': typeof WorksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/works/$id' | '/tools/' | '/works/'
+  fullPaths: '/' | '/tools/$id' | '/works/$id' | '/tools/' | '/works/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/works/$id' | '/tools' | '/works'
-  id: '__root__' | '/' | '/works/$id' | '/tools/' | '/works/'
+  to: '/' | '/tools/$id' | '/works/$id' | '/tools' | '/works'
+  id: '__root__' | '/' | '/tools/$id' | '/works/$id' | '/tools/' | '/works/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ToolsIdRoute: typeof ToolsIdRoute
   WorksIdRoute: typeof WorksIdRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   WorksIndexRoute: typeof WorksIndexRoute
@@ -85,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/$id': {
+      id: '/tools/$id'
+      path: '/tools/$id'
+      fullPath: '/tools/$id'
+      preLoaderRoute: typeof ToolsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/works/': {
       id: '/works/'
       path: '/works'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ToolsIdRoute: ToolsIdRoute,
   WorksIdRoute: WorksIdRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   WorksIndexRoute: WorksIndexRoute,
