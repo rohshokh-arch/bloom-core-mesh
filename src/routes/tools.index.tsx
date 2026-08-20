@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowUpRight, Clock, Zap } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { tools } from "@/data/tools";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -194,5 +194,3 @@ function ToolsPage() {
     </div>
   );
 }
-
-export { Zap, Clock };
