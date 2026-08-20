@@ -4,7 +4,7 @@ import { projects } from "@/data/projects";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
-export const Route = createFileRoute("/works")({
+export const Route = createFileRoute("/works/")({
   head: () => ({
     meta: [
       { title: "Works — CadF computational design archive" },
