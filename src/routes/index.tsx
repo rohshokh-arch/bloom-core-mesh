@@ -6,6 +6,7 @@ import { tools } from "@/data/tools";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ToolThumb, TypeBadge } from "@/components/site/ToolCard";
+import { BrandLinkButton } from "@/components/site/BrandButton";
 
 const VesperScene = lazy(() => import("@/components/hero/VesperScene"));
 
@@ -32,8 +33,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const featuredProjects = projects.slice(0, 3);
-  const featuredTools = tools.slice(0, 3);
+  const featuredProjects = projects.slice(0, 6);
+  const featuredTools = tools.slice(0, 6);
 
   return (
     <div className="relative bg-background">
@@ -71,12 +72,9 @@ function Index() {
               with our Grasshopper tools running live in your browser.
             </p>
             <div className="grid w-full gap-3 sm:grid-cols-2">
-              <Link
-                to="/tools"
-                className="flex items-center justify-center gap-2.5 bg-teal px-5 py-3.5 text-sm text-teal-foreground transition-colors hover:bg-teal/90"
-              >
+              <BrandLinkButton to="/tools" className="w-full">
                 Explore Tools
-              </Link>
+              </BrandLinkButton>
               <Link
                 to="/works"
                 className="flex items-center justify-center gap-2.5 border border-foreground/25 px-5 py-3.5 text-sm text-foreground transition-colors hover:border-foreground/60"
@@ -108,12 +106,9 @@ function Index() {
                 Projects resolved from logic into matter
               </h2>
             </div>
-            <Link
-              to="/works"
-              className="inline-flex shrink-0 items-center gap-2 border border-foreground/25 px-5 py-3 text-sm text-foreground transition-colors hover:border-foreground/60"
-            >
+            <BrandLinkButton to="/works">
               All works <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            </BrandLinkButton>
           </div>
 
           <div className="mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
@@ -140,6 +135,10 @@ function Index() {
               </Link>
             ))}
           </div>
+
+          <div className="mt-10 flex justify-center">
+            <BrandLinkButton to="/works">View more works</BrandLinkButton>
+          </div>
         </div>
       </section>
 
@@ -155,12 +154,9 @@ function Index() {
                 Grasshopper definitions, running in your browser
               </h2>
             </div>
-            <Link
-              to="/tools"
-              className="inline-flex shrink-0 items-center gap-2 border border-foreground/25 px-5 py-3 text-sm text-foreground transition-colors hover:border-foreground/60"
-            >
+            <BrandLinkButton to="/tools">
               All tools <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            </BrandLinkButton>
           </div>
 
           <div className="mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
@@ -190,6 +186,10 @@ function Index() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <BrandLinkButton to="/tools">View more tools</BrandLinkButton>
           </div>
         </div>
       </section>
