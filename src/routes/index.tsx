@@ -99,7 +99,7 @@ function Index() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 [ Selected works ]
               </p>
               <h2 className="mt-3 max-w-[18ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
@@ -137,7 +137,9 @@ function Index() {
           </div>
 
           <div className="mt-10 flex justify-center">
-            <BrandLinkButton to="/works">View more works</BrandLinkButton>
+            <BrandLinkButton to="/works" className="w-full max-w-xs">
+              View more works
+            </BrandLinkButton>
           </div>
         </div>
       </section>
@@ -147,7 +149,7 @@ function Index() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 [ Live tools ]
               </p>
               <h2 className="mt-3 max-w-[20ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
@@ -189,7 +191,9 @@ function Index() {
           </div>
 
           <div className="mt-10 flex justify-center">
-            <BrandLinkButton to="/tools">View more tools</BrandLinkButton>
+            <BrandLinkButton to="/tools" className="w-full max-w-xs">
+              View more tools
+            </BrandLinkButton>
           </div>
         </div>
       </section>
@@ -197,7 +201,7 @@ function Index() {
       {/* PROCESS */}
       <section className="relative z-10 border-t border-border/70 px-4 py-20 sm:px-10">
         <div className="mx-auto max-w-4xl">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             [ The process ]
           </p>
           <h2 className="mt-3 max-w-[16ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
@@ -262,7 +266,7 @@ function Index() {
       <section id="contact" className="relative z-10 border-t border-border/70 px-4 py-20 sm:px-10">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               [ About CadF ]
             </p>
             <h2 className="mt-3 max-w-[18ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
@@ -291,7 +295,7 @@ function Index() {
           </div>
 
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               [ Contact us ]
             </p>
             <h2 className="mt-3 max-w-[16ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
