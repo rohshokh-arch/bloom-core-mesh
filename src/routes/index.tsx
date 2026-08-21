@@ -6,6 +6,7 @@ import { tools } from "@/data/tools";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ToolThumb, TypeBadge } from "@/components/site/ToolCard";
+import { BrandLinkButton } from "@/components/site/BrandButton";
 
 const VesperScene = lazy(() => import("@/components/hero/VesperScene"));
 
@@ -32,8 +33,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const featuredProjects = projects.slice(0, 3);
-  const featuredTools = tools.slice(0, 3);
+  const featuredProjects = projects.slice(0, 6);
+  const featuredTools = tools.slice(0, 6);
 
   return (
     <div className="relative bg-background">
@@ -71,12 +72,9 @@ function Index() {
               with our Grasshopper tools running live in your browser.
             </p>
             <div className="grid w-full gap-3 sm:grid-cols-2">
-              <Link
-                to="/tools"
-                className="flex items-center justify-center gap-2.5 bg-teal px-5 py-3.5 text-sm text-teal-foreground transition-colors hover:bg-teal/90"
-              >
+              <BrandLinkButton to="/tools" className="w-full">
                 Explore Tools
-              </Link>
+              </BrandLinkButton>
               <Link
                 to="/works"
                 className="flex items-center justify-center gap-2.5 border border-foreground/25 px-5 py-3.5 text-sm text-foreground transition-colors hover:border-foreground/60"
@@ -108,12 +106,9 @@ function Index() {
                 Projects resolved from logic into matter
               </h2>
             </div>
-            <Link
-              to="/works"
-              className="inline-flex shrink-0 items-center gap-2 border border-foreground/25 px-5 py-3 text-sm text-foreground transition-colors hover:border-foreground/60"
-            >
+            <BrandLinkButton to="/works">
               All works <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            </BrandLinkButton>
           </div>
 
           <div className="mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
@@ -140,6 +135,10 @@ function Index() {
               </Link>
             ))}
           </div>
+
+          <div className="mt-10 flex justify-center">
+            <BrandLinkButton to="/works">View more works</BrandLinkButton>
+          </div>
         </div>
       </section>
 
@@ -155,12 +154,9 @@ function Index() {
                 Grasshopper definitions, running in your browser
               </h2>
             </div>
-            <Link
-              to="/tools"
-              className="inline-flex shrink-0 items-center gap-2 border border-foreground/25 px-5 py-3 text-sm text-foreground transition-colors hover:border-foreground/60"
-            >
+            <BrandLinkButton to="/tools">
               All tools <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            </BrandLinkButton>
           </div>
 
           <div className="mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
@@ -190,6 +186,10 @@ function Index() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <BrandLinkButton to="/tools">View more tools</BrandLinkButton>
           </div>
         </div>
       </section>
@@ -254,6 +254,95 @@ function Index() {
             >
               Try a live tool
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ABOUT + CONTACT */}
+      <section id="contact" className="relative z-10 border-t border-border/70 px-4 py-20 sm:px-10">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              [ About CadF ]
+            </p>
+            <h2 className="mt-3 max-w-[18ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
+              A computational studio between design and the machine
+            </h2>
+            <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              We work with architects, engineers and fabricators to turn design intent into
+              computation. Parametric geometry, solvers, optimisation and automation pipelines —
+              delivered as fabrication-ready output and as Grasshopper tools that run live in the
+              browser.
+            </p>
+            <dl className="mt-10 grid gap-px bg-border sm:grid-cols-3">
+              {[
+                { k: "Founded", v: "2019" },
+                { k: "Projects delivered", v: "40+" },
+                { k: "Disciplines", v: "Design · Engineering · Fabrication" },
+              ].map((item) => (
+                <div key={item.k} className="bg-background p-5">
+                  <dt className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {item.k}
+                  </dt>
+                  <dd className="mt-2 text-sm text-foreground">{item.v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              [ Contact us ]
+            </p>
+            <h2 className="mt-3 max-w-[16ch] text-[clamp(1.7rem,3.8vw,2.8rem)] font-extralight leading-[1.08] tracking-[-0.03em] text-foreground">
+              Tell us what you want to build
+            </h2>
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
+              Send us the geometry, the constraints or just the question. We reply within two
+              working days.
+            </p>
+
+            <ul className="mt-8 grid gap-px bg-border">
+              {[
+                { k: "Email", v: "hello@cadf.io", href: "mailto:hello@cadf.io" },
+                { k: "Studio", v: "Remote — projects worldwide" },
+                { k: "Enquiries", v: "Consulting · Tool development · Fabrication support" },
+              ].map((row) => (
+                <li key={row.k} className="grid gap-1 bg-background p-5 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {row.k}
+                  </span>
+                  {row.href ? (
+                    <a href={row.href} className="text-sm text-foreground underline-offset-4 hover:underline">
+                      {row.v}
+                    </a>
+                  ) : (
+                    <span className="text-sm text-foreground">{row.v}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a
+                href="mailto:hello@cadf.io"
+                className="inline-flex items-center gap-2.5 bg-teal px-5 py-3.5 text-sm text-teal-foreground transition-colors hover:bg-teal/90"
+              >
+                <img
+                  src="/assets/cadf-logo.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 object-contain"
+                />
+                Email the studio
+              </a>
+              <Link
+                to="/works"
+                className="border border-foreground/25 px-5 py-3.5 text-sm text-foreground transition-colors hover:border-foreground/60"
+              >
+                See what we've built
+              </Link>
+            </div>
           </div>
         </div>
       </section>
